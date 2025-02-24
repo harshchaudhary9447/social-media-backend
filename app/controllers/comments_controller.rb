@@ -1,4 +1,4 @@
-require "debug"
+# require "debug"
 class CommentsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_post
@@ -10,7 +10,7 @@ class CommentsController < ApplicationController
   end
 
   def create
-    binding.break
+    # binding.break
     @comment = @post.comments.build(comment_params)
     @comment.user = current_user # Associate comment with logged-in user
 

@@ -1,4 +1,4 @@
-
+require "debug"
 puts "🔥🔥🔥 PostsController loaded 2"
 
 class PostsController < ApplicationController
@@ -11,12 +11,14 @@ class PostsController < ApplicationController
     puts "CP1"
     @posts = Post.includes(:comments).order(created_at: :desc)
     puts "CP2"
-    render json: @posts, include: :comments
+    # This render function is used for returning the json data to the frontend part
+    render json: @posts.to_json(include: { user: { only: [ :id, :first_name, :last_name ] }, comments: { include: { user: { only: [ :id, :first_name, :last_name ] } } } })
   end
 
   def show
     puts "CP3"
-    render json: @post, include: :comments
+    render json: @posts.to_json(include: { user: { only: [ :id, :first_name, :last_name ] }, comments: { include: { user: { only: [ :id, :first_name, :last_name ] } } } })
+    binding.break
   end
 
   def create
@@ -33,7 +35,7 @@ class PostsController < ApplicationController
     @post = current_user.posts.build(post_params)
 
     if @post.save
-      render json: @post, status: :created
+      render json: @post.to_json(include: { user: { only: [ :id, :first_name, :last_name ] } }), status: :created
     else
       render json: @post.errors, status: :unprocessable_entity
     end
