@@ -51,3 +51,5 @@ end
 
 gem "devise", "~> 4.9"
 gem "devise-jwt"
+
+gem "rolify", "~> 6.0"
