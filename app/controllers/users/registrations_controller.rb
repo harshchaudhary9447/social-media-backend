@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# require "debug"
+
 module Users
   class RegistrationsController < Devise::RegistrationsController
     include RackSessionFix
@@ -19,6 +21,8 @@ module Users
 
     # Custom JSON response for user sign-up
     def respond_with(resource, _opts = {})
+    # binding.break
+    puts resource
       if request.method == "POST" && resource.persisted?
         render json: {
           status: { code: 200, message: "Signed up successfully." },
@@ -33,6 +37,7 @@ module Users
           message: "User is not able to create account",
           error: resource.errors.full_messages.to_sentence
         }, status: :unprocessable_entity
+
       end
     end
   end

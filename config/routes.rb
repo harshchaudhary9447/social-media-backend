@@ -4,21 +4,23 @@ Rails.application.routes.draw do
     registrations: "users/registrations"
   }
 
+  # Normal user routes
   resources :posts, only: [ :index, :create, :show, :update, :destroy ] do
     resources :comments, only: [ :index, :create, :destroy ]
   end
 
-  # Admin routes - Correcting the namespace
-  # i am adding this patch url patch 'admin/users/:id/toggle_activation', to: 'admin/users#toggle_activation'
-  # which is converted into differnt format like below.
+  # Admin routes
   namespace :admin do
     resources :users, only: [ :index, :create ] do
       member do
         patch :toggle_activation
       end
     end
-  end
 
+    # Admin can delete any post or comment
+    resources :posts, only: [ :create, :update, :destroy ]
+    resources :comments, only: [ :create, :update, :destroy ]
+  end
 
   # Health check route
   get "up" => "rails/health#show", as: :rails_health_check

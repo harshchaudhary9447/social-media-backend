@@ -16,7 +16,7 @@ class User < ApplicationRecord
     self.add_role(:normal) if self.roles.blank? # Every new user gets the 'normal' role
   end
 
-  validates :email, uniqueness: true, presence: true
-  validates :phone_number, uniqueness: true, presence: true,
-                           format: { with: /\A\d{10}\z/, message: "must be 10 digits" }
+  # validates :email, uniqueness: true, presence: true
+  # validates :phone_number, uniqueness: true, presence: true,
+  #                          format: { with: /\A\d{10}\z/, message: "must be 10 digits" }
 end
