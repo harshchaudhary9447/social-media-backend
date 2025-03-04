@@ -53,3 +53,7 @@ gem "devise", "~> 4.9"
 gem "devise-jwt"
 
 gem "rolify", "~> 6.0"
+gem "caxlsx"
+gem "caxlsx_rails"
+gem "axlsx_rails" # For generating XLSX files
+gem "csv"

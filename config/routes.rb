@@ -20,6 +20,15 @@ Rails.application.routes.draw do
     # Admin can delete any post or comment
     resources :posts, only: [ :create, :update, :destroy ]
     resources :comments, only: [ :create, :update, :destroy ]
+
+    # Reports Routes (Users, Active Users, Posts)
+    resources :reports, only: [] do
+      collection do
+        get :users_report
+        get :active_users_report
+        get :posts_report
+      end
+    end
   end
 
   # Health check route
