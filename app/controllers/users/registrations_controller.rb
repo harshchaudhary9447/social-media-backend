@@ -24,6 +24,9 @@ module Users
     # binding.break
     puts resource
       if request.method == "POST" && resource.persisted?
+
+        # UserMailer.welcome_email(resource).deliver
+
         render json: {
           status: { code: 200, message: "Signed up successfully." },
           data: resource

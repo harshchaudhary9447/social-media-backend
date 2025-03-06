@@ -1,6 +1,5 @@
 class User < ApplicationRecord
-  rolify # Enable role management
-
+  rolify
   include Devise::JWT::RevocationStrategies::JTIMatcher
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
@@ -8,15 +7,22 @@ class User < ApplicationRecord
 
   has_many :posts, dependent: :destroy
   has_many :comments, dependent: :destroy
+  has_many :likes, dependent: :destroy
 
-  # Set default role after user creation
-  after_create :assign_default_role
+
+  after_create :send_welcome_email, :assign_default_role
 
   def assign_default_role
-    self.add_role(:normal) if self.roles.blank? # Every new user gets the 'normal' role
+    self.add_role(:normal) if self.roles.blank?
   end
 
-  # validates :email, uniqueness: true, presence: true
-  # validates :phone_number, uniqueness: true, presence: true,
-  #                          format: { with: /\A\d{10}\z/, message: "must be 10 digits" }
+  private
+
+  def send_welcome_email
+    UserMailer.welcome_email(self).deliver_later
+  end
 end
+
+# validates :email, uniqueness: true, presence: true
+# validates :phone_number, uniqueness: true, presence: true,
+#                          format: { with: /\A\d{10}\z/, message: "must be 10 digits" }

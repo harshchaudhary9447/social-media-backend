@@ -6,7 +6,13 @@ Rails.application.routes.draw do
 
   # Normal user routes
   resources :posts, only: [ :index, :create, :show, :update, :destroy ] do
-    resources :comments, only: [ :index, :create, :destroy ]
+    resources :likes, only: [ :create ] # Keep create as it is
+    delete "likes", to: "likes#destroy" # Allow deleting like without needing like ID
+
+    resources :comments, only: [ :index, :create, :destroy ] do
+      resources :likes, only: [ :create ] # Keep create as it is
+      delete "likes", to: "likes#destroy" # Allow deleting comment like without needing like ID
+    end
   end
 
   # Admin routes

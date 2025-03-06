@@ -1,16 +1,10 @@
 class ApplicationController < ActionController::API
   before_action :authenticate_user!
+  before_action :ensure_json_request
 
   private
 
-  # def authenticate_user!
-  #   puts "🔐 AUTH CHECK"
-  #   unless request.headers["Authorization"].present?
-  #     puts "❌ TOKEN MISSING"
-  #     return render json: { error: "Token missing" }, status: :unauthorized
-  #   end
-  #   puts "✅ Token Found"
-
-  #   super
-  # end
+  def ensure_json_request
+    request.format = :json if request.format.html?
+  end
 end
