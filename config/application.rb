@@ -30,6 +30,6 @@ module SocialMediaBackend
     config.api_only = true
 
     # Ye deployment ke liye dala hai hata dunga
-    config.active_job.queue_adapter = :async
+    config.active_job.queue_adapter = :solid_queue
   end
 end
