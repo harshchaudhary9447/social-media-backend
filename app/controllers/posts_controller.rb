@@ -1,4 +1,4 @@
-require "debug"
+# require "debug"
 puts "🔥🔥🔥 PostsController loaded 2"
 
 class PostsController < ApplicationController
