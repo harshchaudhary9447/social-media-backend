@@ -16,6 +16,7 @@ test:
 
 production:
   <<: *default
-  database: maze_production
-  username: <%= ENV['DATABASE_USERNAME'] %>
-  password: <%= ENV['DATABASE_PASSWORD'] %>
+  # database: maze_production
+  # username: <%= ENV['DATABASE_USERNAME'] %>
+  # password: <%= ENV['DATABASE_PASSWORD'] %>
+  url: <%= ENV['DATABASE_URL'] %>
