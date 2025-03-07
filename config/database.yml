@@ -15,8 +15,12 @@ test:
   database: maze_test
 
 production:
-  <<: *default
-  # database: maze_production
-  # username: <%= ENV['DATABASE_USERNAME'] %>
-  # password: <%= ENV['DATABASE_PASSWORD'] %>
-  url: <%= ENV['DATABASE_URL'] %>
+  primary:
+    adapter: postgresql
+    url: <%= ENV['DATABASE_URL'] %>
+    pool: 5
+
+  queue:
+    adapter: postgresql
+    url: <%= ENV['DATABASE_URL'] %>
+    pool: 5
