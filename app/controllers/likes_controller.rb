@@ -27,6 +27,6 @@ class LikesController < ApplicationController
   private
 
   def find_likeable
-    params[:post_id] ? Post.find(params[:post_id]) : Comment.find(params[:comment_id])
+    params[:comment_id] ? Comment.find(params[:comment_id]) : Post.find(params[:post_id])
   end
 end

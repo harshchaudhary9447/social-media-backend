@@ -1,15 +1,17 @@
-# require "debug"
-puts "🔥🔥🔥 PostsController loaded 2"
-
 class PostsController < ApplicationController
-  before_action :authenticate_user!
-  # before_action :set_post, only: [ :show, :update, :destroy ]
-
-  puts "🔥🔥🔥 PostsController loaded"
-
+  before_action :authenticate_user!, except: [ :index, :show ]
+  before_action :set_post, only: [ :show, :update, :destroy ]
 
   def index
-    @posts = Post.includes(:comments, :likes).order(created_at: :desc)
+    if current_user
+      @posts = Post.includes(:comments, :likes)
+                   .where("visibility = ? OR user_id = ?", "public", current_user.id)
+                   .order(created_at: :desc)
+    else
+      @posts = Post.includes(:comments, :likes)
+                   .where(visibility: "public")
+                   .order(created_at: :desc)
+    end
 
     render json: @posts.map { |post|
       post.as_json(
@@ -17,39 +19,37 @@ class PostsController < ApplicationController
           user: { only: [ :id, :first_name, :last_name ] },
           comments: {
             include: { user: { only: [ :id, :first_name, :last_name ] } },
-            methods: [ :likes_count ] # Include likes count for comments
+            methods: [ :likes_count ]
           }
         },
-        methods: [ :likes_count ] # Include likes count for posts
-      ).merge(liked_by_current_user: post.likes.exists?(user_id: current_user.id)) # Add if user liked post
+        methods: [ :likes_count ]
+      ).merge(liked_by_current_user: post.likes.exists?(user_id: current_user&.id))
     }
   end
 
   def show
-    post = Post.includes(:comments, :likes).find(params[:id])
+    if @post.nil?
+      return render json: { error: "Post not found" }, status: :not_found
+    end
 
-    render json: post.as_json(
+    if @post.visibility == "private" && @post.user != current_user
+      return render json: { error: "Unauthorized to view this post" }, status: :unauthorized
+    end
+
+    render json: @post.as_json(
       include: {
         user: { only: [ :id, :first_name, :last_name ] },
         comments: {
           include: { user: { only: [ :id, :first_name, :last_name ] } },
-          methods: [ :likes_count ] # Include likes count for comments
+          methods: [ :likes_count ]
         }
       },
-      methods: [ :likes_count ] # Include likes count for posts
-    ).merge(liked_by_current_user: post.likes.exists?(user_id: current_user.id)) # Add if user liked post
+      methods: [ :likes_count ]
+    ).merge(liked_by_current_user: @post.likes.exists?(user_id: current_user&.id))
   end
 
   def create
-    puts "CP1"
-
-
-    if current_user.nil?
-      puts "Aa gaya bhai"
-      return render json: { error: "Unauthorized - Invalid token" }, status: :unauthorized
-    end
-
-    puts "🚀 Current User: #{current_user.email}"
+    return render json: { error: "Unauthorized - Invalid token" }, status: :unauthorized if current_user.nil?
 
     @post = current_user.posts.build(post_params)
 
@@ -61,102 +61,37 @@ class PostsController < ApplicationController
   end
 
   def update
-    puts "Update request received with params: #{params.inspect}"  # Debugging line
+    return render json: { error: "Post not found" }, status: :not_found if @post.nil?
 
-    @post = Post.find_by(id: params[:id]) # Ensure we fetch the post
-    if @post.nil?
-      return render json: { error: "Post not found" }, status: :not_found
-    end
-
-    if @post.user == current_user && @post.update(post_params)
-      render json: @post, status: :ok  # ✅ Send updated post data
+    if @post.user == current_user
+      if @post.update(post_params)
+        render json: @post, status: :ok
+      else
+        render json: { error: @post.errors.full_messages }, status: :unprocessable_entity
+      end
     else
-      render json: { error: "Not authorized or update failed" }, status: :unauthorized
+      render json: { error: "Not authorized to update this post" }, status: :unauthorized
     end
   end
 
-
-
   def destroy
-    puts "Aaa gya andar"
-    # binding.break
-    puts "Nikal gya bhar"
-    @post = Post.find_by(id: params[:id]) # Use find_by to avoid exceptions
-    if @post.nil?
-      return render json: { error: "Post not found" }, status: :not_found
-    end
+    return render json: { error: "Post not found" }, status: :not_found if @post.nil?
 
-    if @post.user == current_user # Ensure only the owner can delete
+    if @post.user == current_user
       @post.destroy
       head :no_content
     else
-      render json: { error: "Not authorized" }, status: :unauthorized
+      render json: { error: "Not authorized to delete this post" }, status: :unauthorized
     end
   end
-
 
   private
 
   def set_post
-    @post = Post.find(params[:id])
+    @post = Post.find_by(id: params[:id])
   end
 
   def post_params
-    params.require(:post).permit(:title, :description)
+    params.require(:post).permit(:title, :description, :visibility)
   end
 end
-
-# require "debug"
-# puts "🔥🔥🔥 PostsController loaded 2"
-
-# class PostsController < ApplicationController
-#   before_action :authenticate_user!
-#   # before_action :set_post, only: [ :show, :update, :destroy ]
-
-#   puts "🔥🔥🔥 PostsController loaded"
-
-#   def update
-#     puts "Update request received with params: #{params.inspect}"  # Debugging line
-
-#     @post = Post.find_by(id: params[:id]) # Ensure we fetch the post
-#     if @post.nil?
-#       return render json: { error: "Post not found" }, status: :not_found
-#     end
-
-#     if @post.user == current_user && @post.update(post_params)
-#       render json: @post, status: :ok  # ✅ Send updated post data
-#     else
-#       render json: { error: "Not authorized or update failed" }, status: :unauthorized
-#     end
-#   end
-
-
-
-#   def destroy
-#     puts "Aaa gya andar"
-#     # binding.break
-#     puts "Nikal gya bhar"
-#     @post = Post.find_by(id: params[:id]) # Use find_by to avoid exceptions
-#     if @post.nil?
-#       return render json: { error: "Post not found" }, status: :not_found
-#     end
-
-#     if @post.user == current_user # Ensure only the owner can delete
-#       @post.destroy
-#       head :no_content
-#     else
-#       render json: { error: "Not authorized" }, status: :unauthorized
-#     end
-#   end
-
-
-#   private
-
-#   def set_post
-#     @post = Post.find(params[:id])
-#   end
-
-#   def post_params
-#     params.require(:post).permit(:title, :description)
-#   end
-# end

@@ -17,14 +17,17 @@ Rails.application.routes.draw do
 
   # Admin routes
   namespace :admin do
-    resources :users, only: [ :index, :create ] do
+    resources :users, only: [ :index, :create, :destroy ] do
       member do
         patch :toggle_activation
+      end
+      collection do
+        post :bulk_upload # New route for bulk user upload
       end
     end
 
     # Admin can delete any post or comment
-    resources :posts, only: [ :create, :update, :destroy ]
+    resources :posts, only: [ :index, :create, :update, :destroy ]
     resources :comments, only: [ :create, :update, :destroy ]
 
     # Reports Routes (Users, Active Users, Posts)

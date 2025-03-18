@@ -1,6 +1,42 @@
 module Admin
   class PostsController < AdminController
-    before_action :set_post, only: [ :update, :destroy ]
+    before_action :set_post, only: [ :show, :update, :destroy ]
+
+    # Admin can view all posts
+    def index
+      @posts = Post.includes(:user, :comments, :likes).order(created_at: :desc)
+
+      render json: @posts.map { |post|
+        post.as_json(
+          include: {
+            user: { only: [ :id, :first_name, :last_name ] },
+            comments: {
+              include: { user: { only: [ :id, :first_name, :last_name ] } },
+              methods: [ :likes_count ]
+            }
+          },
+          methods: [ :likes_count ]
+        ).merge(liked_by_current_user: post.likes.exists?(user_id: current_user&.id))
+      }
+    end
+
+    # Admin can view a specific post
+    def show
+      if @post.nil?
+        return render json: { error: "Post not found" }, status: :not_found
+      end
+
+      render json: @post.as_json(
+        include: {
+          user: { only: [ :id, :first_name, :last_name ] },
+          comments: {
+            include: { user: { only: [ :id, :first_name, :last_name ] } },
+            methods: [ :likes_count ]
+          }
+        },
+        methods: [ :likes_count ]
+      ).merge(liked_by_current_user: @post.likes.exists?(user_id: current_user&.id))
+    end
 
     # Admin can create a post
     def create
@@ -30,12 +66,6 @@ module Admin
     end
 
     private
-
-    def authorize_admin
-      unless current_user.has_role?(:admin)
-        render json: { error: "Unauthorized access" }, status: :unauthorized
-      end
-    end
 
     def set_post
       @post = Post.find_by(id: params[:id])

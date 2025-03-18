@@ -31,6 +31,7 @@ module SocialMediaBackend
 
     # Ye deployment ke liye dala hai hata dunga
     # config.active_job.queue_adapter = :solid_queue
-    config.active_job.queue_adapter = :inline
+    config.active_job.queue_adapter = :sidekiq
+
   end
 end

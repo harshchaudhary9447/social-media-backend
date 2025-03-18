@@ -62,3 +62,6 @@ gem "axlsx_rails" # For generating XLSX files
 gem "csv"
 
 gem "sendgrid-ruby", "~> 6.7"
+gem "sidekiq"
+gem "roo"
+# Ensures better XLSX support

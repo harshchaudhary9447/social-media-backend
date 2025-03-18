@@ -10,7 +10,7 @@ class User < ApplicationRecord
   has_many :likes, dependent: :destroy
 
 
-  # after_create :send_welcome_email, :assign_default_role
+  after_create :send_welcome_email, :assign_default_role
 
   def assign_default_role
     self.add_role(:normal) if self.roles.blank?

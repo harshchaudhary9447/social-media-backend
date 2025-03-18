@@ -7,7 +7,16 @@ class Users::SessionsController < Devise::SessionsController
     if resource.active? # Prevent deactivated users from logging in
       render json: {
         status: { code: 200, message: "Logged in successfully." },
-        data: resource,
+        data: {
+          id: resource.id,
+          first_name: resource.first_name, # Include first_name
+          last_name: resource.last_name,
+          email: resource.email,
+          role: resource.roles.first&.name,
+          total_posts: resource.posts.count, # Count of total posts
+          total_comments: resource.comments.count, # Count of total comments
+          total_likes: resource.likes.count # Count of total likes
+        },
         token: request.env["warden-jwt_auth.token"] # Retrieves JWT from Devise
       }, status: :ok
     else
