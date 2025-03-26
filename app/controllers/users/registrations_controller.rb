@@ -26,10 +26,21 @@ module Users
       if request.method == "POST" && resource.persisted?
 
         # UserMailer.welcome_email(resource).deliver
+        token = request.env["warden-jwt_auth.token"]
 
         render json: {
           status: { code: 200, message: "Signed up successfully." },
-          data: resource
+          data: {
+            id: resource.id,
+            first_name: resource.first_name,
+            last_name: resource.last_name,
+            email: resource.email,
+            role: resource.roles.first&.name, # Get assigned role
+            total_posts: resource.posts.count,
+            total_comments: resource.comments.count,
+            total_likes: resource.likes.count
+          },
+          token: token # Include JWT token in response
         }, status: :ok
       elsif request.method == "DELETE"
         render json: {
@@ -40,7 +51,6 @@ module Users
           message: "User is not able to create account",
           error: resource.errors.full_messages.to_sentence
         }, status: :unprocessable_entity
-
       end
     end
   end

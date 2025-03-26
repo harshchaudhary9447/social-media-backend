@@ -25,10 +25,11 @@ module Admin
 
     # 2. Report of users with more than 10 posts
     def active_users_report
-      users = User.left_joins(:posts)
-                  .select("users.id, users.email, users.first_name, users.last_name, COUNT(posts.id) AS posts_count")
-                  .group("users.id")
-                  .having("COUNT(posts.id) > 10")
+      users = User.joins(:posts)
+            .where("users.id IN (SELECT user_id FROM posts GROUP BY user_id HAVING COUNT(id) > 3)")
+            .select("users.id, users.email, users.first_name, users.last_name, posts.id AS post_id, posts.title, posts.description")
+
+
 
       if request.format.csv?
         send_data generate_csv(users), filename: "active_users_report.csv"
